@@ -9,7 +9,10 @@ app budgetbuddy {
       usernameAndPassword: {},
     },
     onAuthFailedRedirectTo: "/login"
-  }
+  },
+  dependencies: [
+    ("antd", "5.8.2")
+  ]
 }
 
 entity User {=psl 
