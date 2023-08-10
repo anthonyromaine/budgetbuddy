@@ -4,6 +4,7 @@ import getTransactions from "@wasp/queries/getTransactions"
 import { useQuery } from "@wasp/queries"
 import { Transaction } from "@wasp/entities"
 import './Main.css'
+import TransactionModal from "./components/TransactionModal";
 
 
 const { RangePicker } = DatePicker;
@@ -52,6 +53,7 @@ const MainPage = ({ user }: { user: User }) => {
           />
         </Card>
       </div>
+      <TransactionModal />
     </main>
   )
 }
