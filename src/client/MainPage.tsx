@@ -1,11 +1,18 @@
 import { User } from "@wasp/entities";
 import { DatePicker, Card, Statistic } from "antd";
+import getTransactions from "@wasp/queries/getTransactions"
+import { useQuery } from "@wasp/queries"
+import { Transaction } from "@wasp/entities"
 import './Main.css'
 
 
 const { RangePicker } = DatePicker;
 
 const MainPage = ({ user }: { user: User }) => {
+  const { data: transactions, isLoading, error } = useQuery(getTransactions);
+  if (!isLoading){
+    console.log(transactions);
+  }
   return (
     <main className="w-full max-w-3xl mx-auto p-4">
       
