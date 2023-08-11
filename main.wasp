@@ -81,3 +81,13 @@ query getTransactions {
   fn: import { getTransactions } from "@server/queries.js",
   entities: [Transaction]
 }
+
+query getCategories {
+  fn: import { getCategories } from "@server/queries.js",
+  entities: [Category]
+}
+
+action createCategory {
+  fn: import { createCategory } from "@server/actions.js",
+  entities: [Category]
+}

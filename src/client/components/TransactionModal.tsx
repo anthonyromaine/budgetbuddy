@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button, Modal, Form, Input, InputNumber, Select, DatePicker } from 'antd';
 import { TransactionType } from '../types/TransactionType';
 import dayjs from "dayjs";
+import CategorySelect from './CategorySelect';
 const { TextArea } = Input;
 
 export default function TransactionModal(){
@@ -77,9 +78,7 @@ export default function TransactionModal(){
             <DatePicker />
           </Form.Item>
 
-          <Form.Item name="category" label="Category" rules={[{required: true}]}>
-            <Select options={[]} />
-          </Form.Item>
+          <CategorySelect />
 
           <Form.Item name="tags" label="Tags">
             <Select mode="multiple" options={[]} />
