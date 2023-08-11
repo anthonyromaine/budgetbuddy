@@ -14,7 +14,8 @@ app budgetbuddy {
     system: PostgreSQL
   },
   dependencies: [
-    ("antd", "5.8.2")
+    ("antd", "5.8.2"),
+    ("dayjs", "1.11.9"),
   ]
 }
 
