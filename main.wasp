@@ -87,7 +87,17 @@ query getCategories {
   entities: [Category]
 }
 
+query getTags {
+  fn: import { getTags } from "@server/queries.js",
+  entities: [Tag]
+}
+
 action createCategory {
   fn: import { createCategory } from "@server/actions.js",
   entities: [Category]
+}
+
+action createTag {
+  fn: import { createTag } from "@server/actions.js",
+  entities: [Tag]
 }

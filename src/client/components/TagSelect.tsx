@@ -1,12 +1,12 @@
-import React, { useState, useRef } from 'react';
-import { Divider, Input, Select, Space, Button, Form } from 'antd';
+import React, { useState, useRef, useEffect } from 'react';
+import { Divider, Input, Select, Space, Button, Form, message } from 'antd';
 import type { InputRef } from 'antd';
-import getCategories from "@wasp/queries/getCategories";
-import createCategory from '@wasp/actions/createCategory';
+import getTags from "@wasp/queries/getTags";
+import createTag from '@wasp/actions/createTag';
 import { useQuery } from '@wasp/queries';
 
-export default function CategorySelect() {
-  const { data: categories, isLoading, error } = useQuery(getCategories);
+export default function TagSelect() {
+  const { data: tags, isLoading, error } = useQuery(getTags);
   const [name, setName] = useState('');
   const inputRef = useRef<InputRef>(null);
 
@@ -19,9 +19,9 @@ export default function CategorySelect() {
     try {
         const newName = name.trim();
         setName('');
-        await createCategory({ name: newName });
+        await createTag({ name: newName });
     } catch (err: any){
-        window.alert('Error: Could not create category.');
+      window.alert("Error: Could not make tag.");
     }
     setTimeout(() => {
       inputRef.current?.focus();
@@ -29,26 +29,27 @@ export default function CategorySelect() {
   };
 
   return (
-    <Form.Item name="category" label="Category" rules={[{required: true}]}>
+    <Form.Item name="tags" label="Tags">
     <Select
+      mode="multiple"
       dropdownRender={(menu) => (
         <>
           {menu}
           <Divider style={{ margin: '8px 0' }} />
           <Space style={{ padding: '0 8px 4px' }}>
             <Input
-              placeholder="Category Name"
+              placeholder="Tag Name"
               ref={inputRef}
               value={name}
               onChange={onNameChange}
             />
             <Button type="text" className='bg-gray-200' onClick={addItem} disabled={name.trim() ? false : true}>
-              Add Category
+              Add Tag
             </Button>
           </Space>
         </>
       )}
-      options={categories?.map((category) => ({ label: category.name, value: category.name }))}
+      options={tags?.map((tag) => ({ label: tag.name, value: tag.name }))}
     />
     </Form.Item>
   );

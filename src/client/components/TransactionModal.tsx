@@ -3,6 +3,7 @@ import { Button, Modal, Form, Input, InputNumber, Select, DatePicker } from 'ant
 import { TransactionType } from '../types/TransactionType';
 import dayjs from "dayjs";
 import CategorySelect from './CategorySelect';
+import TagSelect from './TagSelect';
 const { TextArea } = Input;
 
 export default function TransactionModal(){
@@ -80,9 +81,7 @@ export default function TransactionModal(){
 
           <CategorySelect />
 
-          <Form.Item name="tags" label="Tags">
-            <Select mode="multiple" options={[]} />
-          </Form.Item>
+          <TagSelect />
 
           <Form.Item name="notes" label="Notes">
             <TextArea />
