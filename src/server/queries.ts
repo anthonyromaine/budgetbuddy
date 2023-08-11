@@ -7,7 +7,12 @@ export const getTransactions: GetTransactions<void, Transaction[]>  = async (arg
     throw new HttpError(401)
   }
   return context.entities.Transaction.findMany(
-    { where: { user: { id: context.user.id } } }
+   { 
+      where: { user: { id: context.user.id } },
+      include: {
+        tags: true
+      }
+   }
   )
 }
 

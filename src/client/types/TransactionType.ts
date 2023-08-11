@@ -1,4 +1,4 @@
 export const TransactionType = {
-    Expense: 'expense',
-    Income: 'income'
+    Expense: 'Expense',
+    Income: 'Income'
 } as const;

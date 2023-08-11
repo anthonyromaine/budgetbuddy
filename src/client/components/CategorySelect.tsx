@@ -29,7 +29,7 @@ export default function CategorySelect() {
   };
 
   return (
-    <Form.Item name="category" label="Category" rules={[{required: true}]}>
+    <Form.Item name="category" label="Category" rules={[{required: true, message: "Category must not be empty"}]}>
     <Select
       dropdownRender={(menu) => (
         <>
