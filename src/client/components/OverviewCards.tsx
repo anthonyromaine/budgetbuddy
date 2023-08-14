@@ -29,10 +29,10 @@ export default function OverviewCards({ income, expense}: OverviewCardsProps){
         <Card bordered={false}>
           <Statistic
             title="Balance"
-            value={income-expense}
+            value={Math.abs(income-expense)}
             precision={2}
             valueStyle={{ color: (income-expense) > 0 ? '#3f8600': '#cf1322' }}
-            prefix="$"
+            prefix={(income-expense)<0 ? "-$" : "$"}
           />
         </Card>
       </div>

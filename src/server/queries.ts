@@ -11,6 +11,9 @@ export const getTransactions: GetTransactions<void, Transaction[]>  = async (arg
       where: { user: { id: context.user.id } },
       include: {
         tags: true
+      },
+      orderBy: {
+        date: "desc"
       }
    }
   )
