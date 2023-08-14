@@ -1,10 +1,11 @@
 import { User } from "@wasp/entities";
-import { DatePicker, Card, Statistic } from "antd";
+import { DatePicker } from "antd";
 import getTransactions from "@wasp/queries/getTransactions"
 import { useQuery } from "@wasp/queries"
 import { Transaction } from "@wasp/entities"
 import './Main.css'
 import TransactionModal from "./components/TransactionModal";
+import OverviewCards from "./components/OverviewCards";
 
 
 const { RangePicker } = DatePicker;
@@ -24,35 +25,7 @@ const MainPage = ({ user }: { user: User }) => {
         <div><RangePicker /></div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 my-4">
-        <Card bordered={false}>
-          <Statistic
-            title="Income"
-            value={5192.28}
-            precision={2}
-            valueStyle={{ color: '#3f8600' }}
-            prefix="$"
-          />
-        </Card>
-        <Card bordered={false}>
-          <Statistic
-            title="Expenses"
-            value={3610.3}
-            precision={2}
-            valueStyle={{ color: '#cf1322' }}
-            prefix="$"
-          />
-        </Card>
-        <Card bordered={false}>
-          <Statistic
-            title="Balance"
-            value={9.3}
-            precision={2}
-            valueStyle={{ color: '#000000' }}
-            prefix="$"
-          />
-        </Card>
-      </div>
+      <OverviewCards income={5280.72} expense={3620.53} />
       <TransactionModal />
     </main>
   )

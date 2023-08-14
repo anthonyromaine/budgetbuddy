@@ -16,6 +16,7 @@ app budgetbuddy {
   dependencies: [
     ("antd", "5.8.2"),
     ("dayjs", "1.11.9"),
+    ("rc-virtual-list", "3.5.3")
   ]
 }
 
