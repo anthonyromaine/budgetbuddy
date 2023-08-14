@@ -1,7 +1,9 @@
 import { useState } from "react";
 import dayjs from "dayjs";
 import { Tag, User } from "@wasp/entities";
-import { DatePicker, List, Tag as AntTag } from "antd";
+import { DatePicker, List, Tag as AntTag, Space, Dropdown } from "antd";
+import type { MenuProps } from 'antd';
+import { MoreOutlined } from "@ant-design/icons";
 import VirtualList from 'rc-virtual-list';
 import getTransactions from "@wasp/queries/getTransactions"
 import { useQuery } from "@wasp/queries"
@@ -20,10 +22,55 @@ type TransactionWTag = Transaction & {
   tags: Tag[]
 }
 
+const MenuActions = {
+  Edit: "Edit",
+  Note: "Note",
+  Delete: "Delete"
+} as const;
+
+
+function menuItems(id: number, noteShown: boolean){
+  return [
+    {
+      key: `${id}-${MenuActions.Edit}`,
+      label: 'Edit'
+    },
+    {
+      key: `${id}-${MenuActions.Note}`,
+      label: noteShown ? 'Hide Notes' : 'Show Notes'
+    },
+    {
+      key: `${id}-${MenuActions.Delete}`,
+      label: 'Delete',
+      danger: true
+    }
+  ]
+}
+
 const MainPage = ({ user }: { user: User }) => {
   const { data: transactions, isLoading, error } = useQuery(getTransactions);
   const [dateFilter, setDateFilter] = useState<RangeValue<dayjs.Dayjs>>(null);
+  const [noteStatus, setNoteStatus] = useState(new Map<number, boolean>());
   let income = 0, expense = 0;
+
+  function handleMenuClick({key}: {key: string}){
+    const id = Number(key.split('-')[0]);
+    const action = key.split('-')[1];
+    console.log(key, id, action);
+    switch (action){
+      case MenuActions.Edit:
+        break;
+      case MenuActions.Note:
+        let currNoteStatus = noteStatus.get(id) || false;
+        if (currNoteStatus){
+          setNoteStatus(new Map(noteStatus.set(id, false)));
+        } else {
+          setNoteStatus(new Map(noteStatus.set(id, true)));
+        }
+        break;
+      case MenuActions.Delete:
+    }
+  }
 
   if (isLoading){
     return <div>Loading...</div>
@@ -65,10 +112,23 @@ const MainPage = ({ user }: { user: User }) => {
                   <p className="text-gray-500">{transaction.date.toDateString()}</p>
                 </div>
                 <div><span className="text-base">{transaction.categoryName}</span></div>
-                <div className="text-right"><span className={["text-base", transaction.type === TransactionType.Income ? "text-main-green" : "text-main-red"].join(" ")}>{transaction.type == TransactionType.Income ? `+$${transaction.amount}` : `-$${transaction.amount}`}</span></div>
+                <div className="text-right">
+                  <Space>
+                    <span className={["text-base", transaction.type === TransactionType.Income ? "text-main-green" : "text-main-red"].join(" ")}>{transaction.type == TransactionType.Income ? `+$${transaction.amount}` : `-$${transaction.amount}`}</span>
+                    <Dropdown menu={{items: menuItems(transaction.id, noteStatus.get(transaction.id) || false), onClick: handleMenuClick}} placement="bottomRight">
+                      <button>
+                        <MoreOutlined />
+                      </button>
+                    </Dropdown>
+                  </Space>
+                </div>
 
                 <div className="col-span-3">
                   {transaction.tags.map(tag => <AntTag key={tag.id}  color="green">{tag.name}</AntTag>)}
+                </div>
+                <div className={["col-span-3", noteStatus.get(transaction.id) || false ? "" : "hidden"].join(" ")}>
+                  <p className="text-gray-400">Notes:</p>
+                  <p className="text-gray-400">{transaction.notes}</p>
                 </div>
               </div>
             </List.Item>
@@ -79,5 +139,3 @@ const MainPage = ({ user }: { user: User }) => {
   )
 }
 export default MainPage
-
-
