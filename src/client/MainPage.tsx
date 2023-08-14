@@ -10,6 +10,7 @@ import { TransactionType } from "./types/TransactionType";
 import './Main.css'
 import TransactionModal from "./components/TransactionModal";
 import OverviewCards from "./components/OverviewCards";
+import { filterTransactionsByDate, sumTransactionsByType } from "./utils";
 declare type EventValue<DateType> = DateType | null;
 declare type RangeValue<DateType> = [EventValue<DateType>, EventValue<DateType>] | null;
 
@@ -23,39 +24,17 @@ const MainPage = ({ user }: { user: User }) => {
   const { data: transactions, isLoading, error } = useQuery(getTransactions);
   const [dateFilter, setDateFilter] = useState<RangeValue<dayjs.Dayjs>>(null);
   let income = 0, expense = 0;
+
   if (isLoading){
     return <div>Loading...</div>
-  } else {
-    income = transactions?.reduce((prev, curr) => {
-      if (curr.type == TransactionType.Income){
-        return prev + curr.amount
-      }
-      return prev;
-    }, 0) || 0;
+  }
 
-    expense = transactions?.reduce((prev, curr) => {
-      if (curr.type == TransactionType.Expense){
-        return prev + curr.amount
-      }
-      return prev;
-    }, 0) || 0;
+  const filteredTransactions: Transaction[] = transactions?.filter(filterTransactionsByDate(dateFilter?.[0], dateFilter?.[1])) || [];
 
-    const filteredTransactions: Transaction[] = transactions?.filter(transaction => {
-      const transactionDate = DayDate(dayjs(transaction.date));
-      let startDate = dateFilter?.[0] ? DayDate(dateFilter?.[0]) : null;
-      let endDate = dateFilter?.[1] ? DayDate(dateFilter?.[1]) : null;
-      
-      if (startDate && endDate){
-        console.log(transactionDate, startDate)
-        return transactionDate.diff(startDate) >= 0 && transactionDate.diff(endDate) <= 0;
-      } else if (startDate){
-        return transactionDate.diff(startDate) >= 0
-      } else if (endDate){
-        return transactionDate.diff(endDate) <= 0
-      }
+  income = filteredTransactions.reduce(sumTransactionsByType(TransactionType.Income), 0) || 0;
 
-      return true;
-    }) || [];
+  expense = filteredTransactions.reduce(sumTransactionsByType(TransactionType.Expense), 0) || 0;
+
   return (
     <main className="w-full max-w-3xl mx-auto p-4">
       
@@ -69,8 +48,9 @@ const MainPage = ({ user }: { user: User }) => {
       <OverviewCards income={income} expense={expense} />
       <TransactionModal />
 
-      <List className="bg-white rounded-lg px-6 mt-4 shadow">
+      <List>
         <VirtualList
+          className="bg-white rounded-lg px-6 mt-4 shadow"
           data={filteredTransactions as TransactionWTag[] || []}
           height={400}
           fullHeight={false}
@@ -97,14 +77,7 @@ const MainPage = ({ user }: { user: User }) => {
       </List>
     </main>
   )
-  }
 }
 export default MainPage
 
-function DayDate(date: dayjs.Dayjs): dayjs.Dayjs {
-  return dayjs(new Date(
-    date.year(),
-    date.month(),
-    date.date()
-  ))
-}
+
