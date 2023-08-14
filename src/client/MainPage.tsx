@@ -1,3 +1,5 @@
+import { useState } from "react";
+import dayjs from "dayjs";
 import { Tag, User } from "@wasp/entities";
 import { DatePicker, List, Tag as AntTag } from "antd";
 import VirtualList from 'rc-virtual-list';
@@ -8,17 +10,52 @@ import { TransactionType } from "./types/TransactionType";
 import './Main.css'
 import TransactionModal from "./components/TransactionModal";
 import OverviewCards from "./components/OverviewCards";
-
+declare type EventValue<DateType> = DateType | null;
+declare type RangeValue<DateType> = [EventValue<DateType>, EventValue<DateType>] | null;
 
 const { RangePicker } = DatePicker;
+
 type TransactionWTag = Transaction & {
   tags: Tag[]
 }
+
 const MainPage = ({ user }: { user: User }) => {
   const { data: transactions, isLoading, error } = useQuery(getTransactions);
-  if (!isLoading){
-    console.log(transactions);
-  }
+  const [dateFilter, setDateFilter] = useState<RangeValue<dayjs.Dayjs>>(null);
+  let income = 0, expense = 0;
+  if (isLoading){
+    return <div>Loading...</div>
+  } else {
+    income = transactions?.reduce((prev, curr) => {
+      if (curr.type == TransactionType.Income){
+        return prev + curr.amount
+      }
+      return prev;
+    }, 0) || 0;
+
+    expense = transactions?.reduce((prev, curr) => {
+      if (curr.type == TransactionType.Expense){
+        return prev + curr.amount
+      }
+      return prev;
+    }, 0) || 0;
+
+    const filteredTransactions: Transaction[] = transactions?.filter(transaction => {
+      const transactionDate = DayDate(dayjs(transaction.date));
+      let startDate = dateFilter?.[0] ? DayDate(dateFilter?.[0]) : null;
+      let endDate = dateFilter?.[1] ? DayDate(dateFilter?.[1]) : null;
+      
+      if (startDate && endDate){
+        console.log(transactionDate, startDate)
+        return transactionDate.diff(startDate) >= 0 && transactionDate.diff(endDate) <= 0;
+      } else if (startDate){
+        return transactionDate.diff(startDate) >= 0
+      } else if (endDate){
+        return transactionDate.diff(endDate) <= 0
+      }
+
+      return true;
+    }) || [];
   return (
     <main className="w-full max-w-3xl mx-auto p-4">
       
@@ -26,17 +63,15 @@ const MainPage = ({ user }: { user: User }) => {
         <div className="mb-4 sm:mb-0">
           <span className="text-2xl font-bold">Hello, {user.username}</span>
         </div>
-        <div><RangePicker /></div>
+        <div><RangePicker value={dateFilter} onChange={setDateFilter} allowEmpty={[true, true]} /></div>
       </div>
 
-      <OverviewCards income={5280.72} expense={3620.53} />
+      <OverviewCards income={income} expense={expense} />
       <TransactionModal />
 
-      <List className="bg-white rounded-lg px-6 mt-4 shadow"
-        // itemLayout="vertical"
-      >
+      <List className="bg-white rounded-lg px-6 mt-4 shadow">
         <VirtualList
-          data={transactions as TransactionWTag[] || []}
+          data={filteredTransactions as TransactionWTag[] || []}
           height={400}
           fullHeight={false}
           itemHeight={50}
@@ -62,5 +97,14 @@ const MainPage = ({ user }: { user: User }) => {
       </List>
     </main>
   )
+  }
 }
 export default MainPage
+
+function DayDate(date: dayjs.Dayjs): dayjs.Dayjs {
+  return dayjs(new Date(
+    date.year(),
+    date.month(),
+    date.date()
+  ))
+}

@@ -31,7 +31,7 @@ export default function OverviewCards({ income, expense}: OverviewCardsProps){
             title="Balance"
             value={Math.abs(income-expense)}
             precision={2}
-            valueStyle={{ color: (income-expense) > 0 ? '#3f8600': '#cf1322' }}
+            valueStyle={{ color: (income-expense) == 0 ? '#000000' : (income-expense) > 0 ? '#3f8600': '#cf1322' }}
             prefix={(income-expense)<0 ? "-$" : "$"}
           />
         </Card>
