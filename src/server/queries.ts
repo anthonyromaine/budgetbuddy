@@ -2,7 +2,11 @@ import { Transaction, Category, Tag }  from "@wasp/entities"
 import { GetTransactions, GetCategories, GetTags } from "@wasp/queries/types"
 import HttpError from '@wasp/core/HttpError.js'
 
-export const getTransactions: GetTransactions<void, Transaction[]>  = async (args, context) => {
+export type TransactionWTag = Transaction & {
+  tags: Tag[]
+}
+
+export const getTransactions: GetTransactions<void, TransactionWTag[]>  = async (args, context) => {
   if (!context.user) {
     throw new HttpError(401)
   }

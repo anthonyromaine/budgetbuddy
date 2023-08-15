@@ -1,21 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { Button, Modal, Form, Input, InputNumber, Select, DatePicker } from 'antd';
 import { TransactionType } from '../types/TransactionType';
 import dayjs, {type Dayjs} from "dayjs";
-import createTransaction from "@wasp/actions/createTransaction";
+import createOrUpdateTransaction from "@wasp/actions/createOrUpdateTransaction";
 import CategorySelect from './CategorySelect';
 import TagSelect from './TagSelect';
+import { TransactionWTag } from '../utils';
 const { TextArea } = Input;
 
-export default function TransactionModal(){
-  const [form] = Form.useForm();
+export type TransactionModalHandle = {
+  openModal: (transaction: TransactionWTag | null) => void,
+}
+
+type FieldType = {
+  description: string,
+  amount: string,
+  category: string,
+  date: Dayjs,
+  notes: string,
+  tags: string[],
+  type: string
+}
+
+function formInitValues(transaction: TransactionWTag){
+  return [
+    {
+      name: "description",
+      value: transaction.description
+    },
+    {
+      name: "amount",
+      value: transaction.amount
+    },
+    {
+      name: "category",
+      value: transaction.categoryName
+    },
+    {
+      name: "date",
+      value: dayjs(transaction.date)
+    },
+    {
+      name: "notes",
+      value: transaction.notes
+    },
+    {
+      name: "tags",
+      value: transaction.tags.map(tag => tag.name)
+    },
+    {
+      name: "type",
+      value: transaction.type
+    }
+  ]
+}
+
+function TransactionModal({}, ref: React.ForwardedRef<TransactionModalHandle>){
   const [open, setOpen] = useState(false);
+  const [transaction, setTransaction] = useState<TransactionWTag|null>(null);
+  const [form] = Form.useForm();
   const [confirmLoading, setConfirmLoading] = useState(false);
 
-  const showModal = () => {
-    form.resetFields();
-    setOpen(true);
-  };
+  useImperativeHandle(ref, () => ({
+    openModal: (transaction: TransactionWTag | null = null) => {
+      setTransaction(transaction);
+      form.resetFields();
+      if (transaction){
+        form.setFields(formInitValues(transaction))
+      }
+      setOpen(true);
+    }
+  }));
 
   const handleOk = () => {
     form.submit();
@@ -23,12 +78,14 @@ export default function TransactionModal(){
 
   const handleCancel = () => {
     setOpen(false);
+    setTransaction(null);
   };
 
   async function handleSubmit(values: FieldType){
     setConfirmLoading(true);
     try {
-      await createTransaction({
+      await createOrUpdateTransaction({
+        id: transaction ? transaction.id : -1,
         description: values.description || "",
         amount: Number(values.amount) || 0.00,
         date: values.date.toDate() || new Date(),
@@ -37,36 +94,24 @@ export default function TransactionModal(){
         tags: values.tags || [],
         type: values.type
       })
-      setOpen(false);
-    } catch (err: any){
-      window.alert("Error: Could not create transaction.")
       setConfirmLoading(false);
+      setOpen(false);
+      setTransaction(null);
+    } catch (err: any){
+      window.alert(`Error: Could not ${transaction ? "edit" : "create"} transaction.`);
+      setConfirmLoading(false);
+      setOpen(false);
+      setTransaction(null);
     }
-  }
-
-  function handleSubmitFailed(){
-    
   }
 
   const typeOptions = Object.entries(TransactionType).map(v => ({label: v[0], value: v[1]}));
 
-  type FieldType = {
-    description: string,
-    amount: string,
-    category: string,
-    date: Dayjs,
-    notes: string,
-    tags: string[],
-    type: string
-  }
-
   return (
     <>
-      <Button type="primary" className="bg-blue-600" onClick={showModal}>
-        Add Transaction
-      </Button>
+      
       <Modal
-        title="New Transaction"
+        title={transaction ? "Edit Transaction" : "New Transaction"}
         open={open}
         onOk={handleOk}
         confirmLoading={confirmLoading}
@@ -81,7 +126,6 @@ export default function TransactionModal(){
           layout='vertical'
           initialValues={{type: typeOptions[0].value, date: dayjs()}}
           onFinish={handleSubmit}
-          onFinishFailed={handleSubmitFailed}
         >
 
           <Form.Item<FieldType> name="description" label="Description" rules={
@@ -122,3 +166,5 @@ export default function TransactionModal(){
     </>
   )
 }
+
+export default forwardRef(TransactionModal)

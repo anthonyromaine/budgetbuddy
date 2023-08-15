@@ -1,6 +1,10 @@
 import dayjs, { Dayjs } from "dayjs";
-import { Transaction } from "@wasp/entities"
+import { Transaction, Tag } from "@wasp/entities"
 import { TransactionType } from "./types/TransactionType";
+
+export type TransactionWTag = Transaction & {
+  tags: Tag[]
+}
 
 export function DayDate(date: dayjs.Dayjs): dayjs.Dayjs {
     return dayjs(new Date(

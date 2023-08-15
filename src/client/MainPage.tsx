@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import dayjs from "dayjs";
 import { Tag, User } from "@wasp/entities";
-import { DatePicker, List, Tag as AntTag, Space, Dropdown } from "antd";
-import type { MenuProps } from 'antd';
+import { DatePicker, List, Tag as AntTag, Space, Dropdown, Button } from "antd";
 import { MoreOutlined } from "@ant-design/icons";
 import VirtualList from 'rc-virtual-list';
 import getTransactions from "@wasp/queries/getTransactions"
@@ -10,18 +9,14 @@ import { useQuery } from "@wasp/queries"
 import { Transaction } from "@wasp/entities"
 import { TransactionType } from "./types/TransactionType";
 import './Main.css'
-import TransactionModal from "./components/TransactionModal";
+import TransactionModal, { TransactionModalHandle } from "./components/TransactionModal";
 import OverviewCards from "./components/OverviewCards";
-import { filterTransactionsByDate, sumTransactionsByType } from "./utils";
+import { filterTransactionsByDate, sumTransactionsByType, TransactionWTag } from "./utils";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModal";
 declare type EventValue<DateType> = DateType | null;
 declare type RangeValue<DateType> = [EventValue<DateType>, EventValue<DateType>] | null;
 
 const { RangePicker } = DatePicker;
-
-type TransactionWTag = Transaction & {
-  tags: Tag[]
-}
 
 const MenuActions = {
   Edit: "Edit",
@@ -54,15 +49,17 @@ const MainPage = ({ user }: { user: User }) => {
   const [noteStatus, setNoteStatus] = useState(new Map<number, boolean>());
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const transactionModalRef = useRef<TransactionModalHandle>(null);
   
   let income = 0, expense = 0;
 
   function handleMenuClick({key}: {key: string}){
     const id = Number(key.split('-')[0]);
     const action = key.split('-')[1];
-    console.log(key, id, action);
+    
     switch (action){
       case MenuActions.Edit:
+        transactionModalRef.current?.openModal(transactions?.find((tran) => tran.id === id) || null);
         break;
       case MenuActions.Note:
         let currNoteStatus = noteStatus.get(id) || false;
@@ -88,7 +85,7 @@ const MainPage = ({ user }: { user: User }) => {
     return <div>Loading...</div>
   }
 
-  const filteredTransactions: Transaction[] = transactions?.filter(filterTransactionsByDate(dateFilter?.[0], dateFilter?.[1])) || [];
+  const filteredTransactions = transactions?.filter(filterTransactionsByDate(dateFilter?.[0], dateFilter?.[1])) || [];
 
   income = filteredTransactions.reduce(sumTransactionsByType(TransactionType.Income), 0) || 0;
 
@@ -105,18 +102,21 @@ const MainPage = ({ user }: { user: User }) => {
       </div>
 
       <OverviewCards income={income} expense={expense} />
-      <TransactionModal />
+      <Button type="primary" className="bg-blue-600" onClick={() => transactionModalRef.current?.openModal(null)}>
+        Add Transaction
+      </Button>
+      <TransactionModal ref={transactionModalRef} />
 
       <List>
         <VirtualList
           className="bg-white rounded-lg px-6 mt-4 shadow"
-          data={filteredTransactions as TransactionWTag[] || []}
+          data={filteredTransactions || []}
           height={400}
           fullHeight={false}
           itemHeight={50}
           itemKey="id"
         >
-          {(transaction: TransactionWTag) => (
+          {(transaction) => (
             <List.Item key={transaction.id}>
               <div className="w-full grid grid-cols-3 gap-2">
                 <div>

@@ -103,8 +103,8 @@ action createTag {
   entities: [Tag]
 }
 
-action createTransaction {
-  fn: import { createTransaction } from "@server/actions.js",
+action createOrUpdateTransaction {
+  fn: import { createOrUpdateTransaction } from "@server/actions.js",
   entities: [Transaction]
 }
 

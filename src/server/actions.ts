@@ -1,5 +1,5 @@
 import { Category, Tag, Transaction } from '@wasp/entities'
-import { CreateCategory, CreateTag, CreateTransaction, DeleteTransaction } from '@wasp/actions/types'
+import { CreateCategory, CreateTag, CreateOrUpdateTransaction, DeleteTransaction } from '@wasp/actions/types'
 import HttpError from '@wasp/core/HttpError.js'
 
 type CreateCategoryPayload = Pick<Category, 'name'>
@@ -36,19 +36,38 @@ export const createTag: CreateTag<CreateTagPayload, Tag> = async (
   })
 }
 
-type CreateTransactionPayload = Pick<Transaction, "date" | "categoryName" | "amount" | "description" | "notes" | "type"> & {
+type CreateOrUpdateTransactionPayload = Pick<Transaction, "date" | "categoryName" | "amount" | "description" | "notes" | "type"> & {
   tags: string[]
+  id?: number
 };
 
-export const createTransaction: CreateTransaction<CreateTransactionPayload, Transaction> = async (
+export const createOrUpdateTransaction: CreateOrUpdateTransaction<CreateOrUpdateTransactionPayload, Transaction> = async (
   args,
   context
 ) => {
   if (!context.user) {
     throw new HttpError(401)
   }
-  return context.entities.Transaction.create({
-    data: {
+  return context.entities.Transaction.upsert({
+    where: {
+      id: args.id || -1
+    },
+    update: {
+      description: args.description,
+      type: args.type,
+      date: args.date,
+      category: { connect: { userId_name: {
+        userId: context.user.id,
+        name: args.categoryName
+      }}},
+      amount: args.amount,
+      notes: args.notes,
+      tags: { set: args.tags.map(tag => ({ userId_name: {
+        userId: context.user!.id,
+        name: tag
+      }}))},
+    },
+    create: {
       description: args.description,
       type: args.type,
       date: args.date,
