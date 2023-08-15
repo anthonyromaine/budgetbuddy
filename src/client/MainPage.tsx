@@ -123,7 +123,7 @@ const MainPage = ({ user }: { user: User }) => {
                 <div><span className="text-base">{transaction.categoryName}</span></div>
                 <div className="text-right">
                   <Space>
-                    <span className={["text-base", transaction.type === TransactionType.Income ? "text-main-green" : "text-main-red"].join(" ")}>{transaction.type == TransactionType.Income ? `+$${transaction.amount}` : `-$${transaction.amount}`}</span>
+                    <span className={["text-base", transaction.type === TransactionType.Income ? "text-main-green" : "text-main-red"].join(" ")}>{transaction.type == TransactionType.Income ? `+$${transaction.amount.toFixed(2)}` : `-$${transaction.amount.toFixed(2)}`}</span>
                     <Dropdown menu={{items: menuItems(transaction.id, noteStatus.get(transaction.id) || false), onClick: handleMenuClick}} placement="bottomRight">
                       <button>
                         <MoreOutlined />
