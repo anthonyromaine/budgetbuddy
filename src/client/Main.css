@@ -19,6 +19,6 @@ body {
 
 @layer components {
   .btn-danger {
-    @apply bg-red-500 hover:!bg-red-700;
+    @apply bg-ant-red-4 hover:!bg-ant-red-6;
   }
 }
