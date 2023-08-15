@@ -12,7 +12,7 @@ import './Main.css'
 import TransactionModal, { TransactionModalHandle } from "./components/TransactionModal";
 import OverviewCards from "./components/OverviewCards";
 import { filterTransactionsByDate, sumTransactionsByType, TransactionWTag } from "./utils";
-import ConfirmDeleteModal from "./components/ConfirmDeleteModal";
+import ConfirmDeleteModal, { ConfirmDeleteModalHandle } from "./components/ConfirmDeleteModal";
 declare type EventValue<DateType> = DateType | null;
 declare type RangeValue<DateType> = [EventValue<DateType>, EventValue<DateType>] | null;
 
@@ -47,8 +47,7 @@ const MainPage = ({ user }: { user: User }) => {
   const { data: transactions, isLoading, error } = useQuery(getTransactions);
   const [dateFilter, setDateFilter] = useState<RangeValue<dayjs.Dayjs>>(null);
   const [noteStatus, setNoteStatus] = useState(new Map<number, boolean>());
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const deleteModalRef = useRef<ConfirmDeleteModalHandle>(null);
   const transactionModalRef = useRef<TransactionModalHandle>(null);
   
   let income = 0, expense = 0;
@@ -59,7 +58,12 @@ const MainPage = ({ user }: { user: User }) => {
     
     switch (action){
       case MenuActions.Edit:
-        transactionModalRef.current?.openModal(transactions?.find((tran) => tran.id === id) || null);
+        const currentTransaction = transactions?.find((tran) => tran.id === id);
+        if (currentTransaction){
+          transactionModalRef.current?.openModal(currentTransaction);
+        } else {
+          window.alert("Error: Could not edit transaction, transaction could not be found");
+        }
         break;
       case MenuActions.Note:
         let currNoteStatus = noteStatus.get(id) || false;
@@ -70,15 +74,9 @@ const MainPage = ({ user }: { user: User }) => {
         }
         break;
       case MenuActions.Delete:
-        setDeleteId(id);
-        setDeleteModalOpen(true);
+        deleteModalRef.current?.openModal(id);
         break;
     }
-  }
-
-  function closeDeleteModal() {
-    setDeleteId(null);
-    setDeleteModalOpen(false);
   }
 
   if (isLoading){
@@ -105,7 +103,6 @@ const MainPage = ({ user }: { user: User }) => {
       <Button type="primary" className="bg-blue-600" onClick={() => transactionModalRef.current?.openModal(null)}>
         Add Transaction
       </Button>
-      <TransactionModal ref={transactionModalRef} />
 
       <List>
         <VirtualList
@@ -147,8 +144,8 @@ const MainPage = ({ user }: { user: User }) => {
           )}
         </VirtualList>
       </List>
-
-      <ConfirmDeleteModal open={deleteModalOpen} closeModal={closeDeleteModal} deleteId={deleteId} />
+      <TransactionModal ref={transactionModalRef} />
+      <ConfirmDeleteModal ref={deleteModalRef} />
     </main>
   )
 }

@@ -1,37 +1,44 @@
-import { useState } from "react";
+import { useState, ForwardedRef, useImperativeHandle, forwardRef } from "react";
 import { Modal } from 'antd';
 import deleteTransaction from "@wasp/actions/deleteTransaction";
 
-type ConfirmDeleteModalProps = {
-    open: boolean,
-    deleteId: number | null,
-    closeModal: () => void,
+export type ConfirmDeleteModalHandle = {
+    openModal: (deleteId: number) => void
 }
 
-export default function ConfirmDeleteModal({ open, deleteId, closeModal }: ConfirmDeleteModalProps) {
+function ConfirmDeleteModal({}, ref: ForwardedRef<ConfirmDeleteModalHandle>) {
+  const [open, setOpen] = useState(false);
+  const [id, setId] = useState<number|null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
 
-  if (!deleteId){
-    closeModal();
-  }
+  useImperativeHandle(ref, () => ({
+    openModal: (deleteId: number) => {
+        setId(deleteId);
+        setOpen(true);
+    }
+  }))
 
   async function handleOk() {
     setConfirmLoading(true);
     try {
+      if (!id){
+        throw new Error('No ID defined!');
+      }
       await deleteTransaction({
-        id: deleteId!
+        id
       });
       setConfirmLoading(false);
-      closeModal();
+      setOpen(false);
     } catch (err: any){
         setConfirmLoading(false);
-        closeModal();
+        setOpen(false);
         window.alert('Error: Could not delete transaction');
     }
   }
 
   function handleCancel() {
-    closeModal();
+    setId(null);
+    setOpen(false);
   }
 
   return (
@@ -51,3 +58,5 @@ export default function ConfirmDeleteModal({ open, deleteId, closeModal }: Confi
     </>
   );
 };
+
+export default forwardRef(ConfirmDeleteModal);
