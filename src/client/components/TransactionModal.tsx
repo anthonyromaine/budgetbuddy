@@ -19,10 +19,6 @@ export default function TransactionModal(){
 
   const handleOk = () => {
     form.submit();
-    // setTimeout(() => {
-    //   setOpen(false);
-    //   setConfirmLoading(false);
-    // }, 2000);
   };
 
   const handleCancel = () => {

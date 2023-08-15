@@ -107,3 +107,8 @@ action createTransaction {
   fn: import { createTransaction } from "@server/actions.js",
   entities: [Transaction]
 }
+
+action deleteTransaction {
+  fn: import { deleteTransaction } from "@server/actions.js",
+  entities: [Transaction]
+}

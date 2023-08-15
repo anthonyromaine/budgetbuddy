@@ -1,5 +1,5 @@
 import { Category, Tag, Transaction } from '@wasp/entities'
-import { CreateCategory, CreateTag, CreateTransaction } from '@wasp/actions/types'
+import { CreateCategory, CreateTag, CreateTransaction, DeleteTransaction } from '@wasp/actions/types'
 import HttpError from '@wasp/core/HttpError.js'
 
 type CreateCategoryPayload = Pick<Category, 'name'>
@@ -64,5 +64,19 @@ export const createTransaction: CreateTransaction<CreateTransactionPayload, Tran
       }}))},
       user: { connect: { id: context.user.id } },
     },
+  })
+}
+
+type DeleteTransactionPayload = Pick<Transaction, "id">;
+
+export const deleteTransaction: DeleteTransaction<DeleteTransactionPayload> = async (args, context) => {
+  if (!context.user) {
+    throw new HttpError(401)
+  }
+
+  return context.entities.Transaction.delete({
+    where: {
+      id: args.id
+    }
   })
 }

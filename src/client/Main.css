@@ -16,3 +16,9 @@ body {
     sans-serif;
   background-color: rgb(234, 234, 234);
 }
+
+@layer components {
+  .btn-danger {
+    @apply bg-red-500 hover:!bg-red-700;
+  }
+}

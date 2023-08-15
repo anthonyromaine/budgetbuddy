@@ -13,6 +13,7 @@ import './Main.css'
 import TransactionModal from "./components/TransactionModal";
 import OverviewCards from "./components/OverviewCards";
 import { filterTransactionsByDate, sumTransactionsByType } from "./utils";
+import ConfirmDeleteModal from "./components/ConfirmDeleteModal";
 declare type EventValue<DateType> = DateType | null;
 declare type RangeValue<DateType> = [EventValue<DateType>, EventValue<DateType>] | null;
 
@@ -51,6 +52,9 @@ const MainPage = ({ user }: { user: User }) => {
   const { data: transactions, isLoading, error } = useQuery(getTransactions);
   const [dateFilter, setDateFilter] = useState<RangeValue<dayjs.Dayjs>>(null);
   const [noteStatus, setNoteStatus] = useState(new Map<number, boolean>());
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  
   let income = 0, expense = 0;
 
   function handleMenuClick({key}: {key: string}){
@@ -69,7 +73,15 @@ const MainPage = ({ user }: { user: User }) => {
         }
         break;
       case MenuActions.Delete:
+        setDeleteId(id);
+        setDeleteModalOpen(true);
+        break;
     }
+  }
+
+  function closeDeleteModal() {
+    setDeleteId(null);
+    setDeleteModalOpen(false);
   }
 
   if (isLoading){
@@ -135,6 +147,8 @@ const MainPage = ({ user }: { user: User }) => {
           )}
         </VirtualList>
       </List>
+
+      <ConfirmDeleteModal open={deleteModalOpen} closeModal={closeDeleteModal} deleteId={deleteId} />
     </main>
   )
 }
