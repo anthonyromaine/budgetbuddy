@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import dayjs from "dayjs";
 import { Tag, User } from "@wasp/entities";
-import { DatePicker, List, Tag as AntTag, Space, Dropdown, Button } from "antd";
+import { DatePicker, List, Tag as AntTag, Space, Dropdown, Button, CascaderProps } from "antd";
 import { MoreOutlined } from "@ant-design/icons";
 import VirtualList from 'rc-virtual-list';
 import getTransactions from "@wasp/queries/getTransactions"
@@ -11,11 +11,12 @@ import { TransactionType } from "./types/TransactionType";
 import './Main.css'
 import TransactionModal, { TransactionModalHandle } from "./components/TransactionModal";
 import OverviewCards from "./components/OverviewCards";
-import { filterTransactionsByDate, sumTransactionsByType, TransactionWTag } from "./utils";
+import { filterTransactions, filterTransactionsByDate, sumTransactionsByType, TransactionWTag } from "./utils";
 import ConfirmDeleteModal, { ConfirmDeleteModalHandle } from "./components/ConfirmDeleteModal";
+import CategoryAndTagFilter, { SingleValueType } from "./components/TransactionFilter";
+import TransactionFilter from "./components/TransactionFilter";
 declare type EventValue<DateType> = DateType | null;
 declare type RangeValue<DateType> = [EventValue<DateType>, EventValue<DateType>] | null;
-
 const { RangePicker } = DatePicker;
 
 const MenuActions = {
@@ -47,6 +48,7 @@ const MainPage = ({ user }: { user: User }) => {
   const { data: transactions, isLoading, error } = useQuery(getTransactions);
   const [dateFilter, setDateFilter] = useState<RangeValue<dayjs.Dayjs>>(null);
   const [noteStatus, setNoteStatus] = useState(new Map<number, boolean>());
+  const [filter, setFilter] = useState<SingleValueType[]>([]);
   const deleteModalRef = useRef<ConfirmDeleteModalHandle>(null);
   const transactionModalRef = useRef<TransactionModalHandle>(null);
   
@@ -83,7 +85,8 @@ const MainPage = ({ user }: { user: User }) => {
     return <div>Loading...</div>
   }
 
-  const filteredTransactions = transactions?.filter(filterTransactionsByDate(dateFilter?.[0], dateFilter?.[1])) || [];
+  let filteredTransactions = transactions?.filter(filterTransactionsByDate(dateFilter?.[0], dateFilter?.[1])) || [];
+  filteredTransactions = filterTransactions(filteredTransactions, filter);
 
   income = filteredTransactions.reduce(sumTransactionsByType(TransactionType.Income), 0) || 0;
 
@@ -96,7 +99,10 @@ const MainPage = ({ user }: { user: User }) => {
         <div className="mb-4 sm:mb-0">
           <span className="text-2xl font-bold">Hello, {user.username}</span>
         </div>
-        <div><RangePicker value={dateFilter} onChange={setDateFilter} allowEmpty={[true, true]} /></div>
+        <div>
+          <TransactionFilter onChange={(val: SingleValueType[]) => setFilter(val)}/>
+          <RangePicker value={dateFilter} onChange={setDateFilter} allowEmpty={[true, true]} />
+        </div>
       </div>
 
       <OverviewCards income={income} expense={expense} />
