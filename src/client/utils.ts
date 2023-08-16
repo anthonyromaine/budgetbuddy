@@ -49,10 +49,13 @@ export function filterTransactions(transactions: TransactionWTag[], filters: Sin
     [FilterGroups.Tag]: tagOptions = [],
     [FilterGroups.Type]: typeOptions = []
   } = getFilterOptionsByGroup(filters);
-  let filteredTransactions = [];
+  let filteredTransactions: TransactionWTag[] = [];
   const filterLogic = logicOptions.length === 1 ? logicOptions[0] : FilterLogic.AND;
 
-  console.log(filterLogic);
+  if (categoryOptions.length === 0 && tagOptions.length === 0 && typeOptions.length === 0){
+    return transactions;
+  }
+
   if (filterLogic === FilterLogic.AND){
     if (categoryOptions.length > 1 || typeOptions.length > 1){
       return [];
@@ -80,13 +83,44 @@ export function filterTransactions(transactions: TransactionWTag[], filters: Sin
 
       return true;
     });
-    console.log(filteredTransactions)
+    
     return filteredTransactions;
   }
   
   // FilterLogic.OR
-  return transactions;
+  // filter by category
+  if (categoryOptions.length > 0){
+    filteredTransactions = transactions.filter(transaction => categoryOptions.includes(transaction.categoryName))
+  }
 
+  // filter by tag
+  if (tagOptions.length > 0){
+    const newTransactions = transactions.filter(transaction => {
+      for (const tag of transaction.tags){
+        if (tagOptions.includes(tag.name) && !containsTransaction(filteredTransactions, transaction.id)){
+          return true;
+        }
+      }
+      return false;
+    })
+    filteredTransactions = filteredTransactions.concat(newTransactions);
+  }
+
+  // filter by type
+  if (typeOptions.length > 0){
+    const newTransactions = transactions.filter(transaction => typeOptions.includes(transaction.type) && !containsTransaction(filteredTransactions, transaction.id));
+    filteredTransactions = filteredTransactions.concat(newTransactions);
+  }
+
+  return filteredTransactions;
+
+}
+
+function containsTransaction (transactions: TransactionWTag[], id: number){
+  if (transactions.find(transaction => transaction.id === id)){
+    return true;
+  }
+  return false;
 }
 
 function getFilterOptionsByGroup(filters: SingleValueType[]){
