@@ -139,3 +139,13 @@ function getFilterOptionsByGroup(filters: SingleValueType[]){
   return Object.fromEntries(optionsByGroup);
 }
 
+export const pages = [
+  {
+    name: "Dashboard",
+    route: "/"
+  },
+  {
+    name: "Statistics",
+    route: "/stats"
+  }
+]

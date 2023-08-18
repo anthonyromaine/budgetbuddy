@@ -78,6 +78,11 @@ page SignupPage {
   component: import Signup from "@client/pages/SignupPage"
 } 
 
+route StatsRoute { path: "/stats", to: StatsPage }
+page StatsPage {
+  component: import Stats from "@client/pages/Stats"
+} 
+
 query getTransactions {
   fn: import { getTransactions } from "@server/queries.js",
   entities: [Transaction]

@@ -1,20 +1,20 @@
 import { useState, useRef } from "react";
 import dayjs from "dayjs";
-import { Tag, User } from "@wasp/entities";
-import { DatePicker, List, Tag as AntTag, Space, Dropdown, Button, CascaderProps } from "antd";
+import { User } from "@wasp/entities";
+import { DatePicker, List, Tag as AntTag, Space, Dropdown, Button } from "antd";
 import { MoreOutlined } from "@ant-design/icons";
 import VirtualList from 'rc-virtual-list';
 import getTransactions from "@wasp/queries/getTransactions"
 import { useQuery } from "@wasp/queries"
-import { Transaction } from "@wasp/entities"
 import { TransactionType } from "./types/TransactionType";
 import './Main.css'
 import TransactionModal, { TransactionModalHandle } from "./components/TransactionModal";
 import OverviewCards from "./components/OverviewCards";
-import { filterTransactions, filterTransactionsByDate, sumTransactionsByType, TransactionWTag } from "./utils";
+import { filterTransactions, filterTransactionsByDate, sumTransactionsByType } from "./utils";
 import ConfirmDeleteModal, { ConfirmDeleteModalHandle } from "./components/ConfirmDeleteModal";
-import CategoryAndTagFilter, { SingleValueType } from "./components/TransactionFilter";
+import { SingleValueType } from "./components/TransactionFilter";
 import TransactionFilter from "./components/TransactionFilter";
+import Menu from "./components/Menu";
 declare type EventValue<DateType> = DateType | null;
 declare type RangeValue<DateType> = [EventValue<DateType>, EventValue<DateType>] | null;
 const { RangePicker } = DatePicker;
@@ -96,10 +96,11 @@ const MainPage = ({ user }: { user: User }) => {
     <main className="w-full max-w-3xl mx-auto p-4">
       
       <div className="flex flex-col sm:flex-row justify-between">
-        <div className="mb-4 sm:mb-0">
+        <div className="flex mb-4 sm:mb-0">
+          <Menu />
           <span className="text-2xl font-bold">Hello, {user.username}</span>
         </div>
-        <div>
+        <div className="flex">
           <TransactionFilter onChange={(val: SingleValueType[]) => setFilter(val)}/>
           <RangePicker value={dateFilter} onChange={setDateFilter} allowEmpty={[true, true]} />
         </div>

@@ -81,7 +81,6 @@ export default function TransactionFilter(cascadeProps: TransactionFilterProps) 
     return (
         <Cascader {...cascadeProps} options={[...customOptions, ...categoryOptions, ...tagOptions]} multiple showCheckedStrategy="SHOW_CHILD">
             <button className="group h-8 w-8 border border-gray-300 rounded-lg mr-2 pb-4 hover:border-ant-blue-3"><FilterOutlined className="!text-xl hover:!text-ant-blue-3 group-hover:!text-ant-blue-3 text-gray-500"/></button>
-                
         </Cascader>
     )
 }
