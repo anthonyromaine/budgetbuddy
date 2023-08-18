@@ -4,8 +4,8 @@ import { User } from "@wasp/entities";
 import { DatePicker, List, Tag as AntTag, Space, Dropdown, Button } from "antd";
 import { MoreOutlined } from "@ant-design/icons";
 import VirtualList from 'rc-virtual-list';
-import getTransactions from "@wasp/queries/getTransactions"
-import { useQuery } from "@wasp/queries"
+import getTransactions from "@wasp/queries/getTransactions";
+import { useQuery } from "@wasp/queries";
 import { TransactionType } from "./types/TransactionType";
 import './Main.css'
 import TransactionModal, { TransactionModalHandle } from "./components/TransactionModal";
